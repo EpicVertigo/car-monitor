@@ -24,6 +24,7 @@ djangorestframework = "*"
 django-rest-knox = "*"
 pyyaml = "*"
 uritemplate = "*"
+django-cors-headers = "*"
 
 [requires]
 python_version = "3.7"

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="initial-scale=1, shrink-to-fit=no, width=device-width" name="viewport">
+    <!-- CSS -->
+    <!-- Add Material font (Roboto) and Material icon as needed -->
+    <link
+        href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i|Roboto+Mono:300,400,700|Roboto+Slab:300,400,700"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Add Material CSS, replace Bootstrap CSS -->
+    <link href="{% static 'autoria/css/material.min.css' %}" rel="stylesheet">
+    <title>Create AutoRIA Monitoring</title>
+</head>
+<nav class="navbar navbar-light bg-primary">
+    <span class="navbar-brand mb-0 h1 text-light">Car Monitoring Profile</span>
+    <ul class="nav justify-content-end">
+        <li class="nav-item">
+            <a class="nav-link disabled text-light" href="#">Logged as {{request.user}}</a>
+        </li>
+    </ul>
+</nav>
+
+<body>
+    <div aria-hidden="true" class="navdrawer navdrawer-permanent navdrawer-permanent-clipped"
+        id="navdrawerPermanentClipped" tabindex="-1">
+        <p class="navdrawer-subheader">Мониторинги</p>
+        <nav class="navdrawer-nav">
+            <a class="nav-item nav-link active" href="#"><i class="material-icons mr-3">alarm_on</i>
+                Активные</a>
+            <a class="nav-item nav-link disabled" href="#"><i class="material-icons mr-3">alarm_off</i>
+                Отключенные</a>
+            <a class="nav-item nav-link" href="#"><i class="material-icons mr-3">link</i>Настройки профиля</a>
+        </nav>
+    </div>
+    <div id="app" class='m-2'>
+    </div>
+</body>
+<script src="{% static 'autoria/main.js' %}"></script>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+
+<!-- Then Material JavaScript on top of Bootstrap JavaScript -->
+<script src="{% static 'autoria/js/material.min.js' %}"></script>
+
+</html>
