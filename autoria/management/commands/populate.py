@@ -76,8 +76,8 @@ class AutoRiaDataController:
     def download_geo_data(self):
         state_data = requests.get(State.api_url+self.api_suffix).json()
         State.objects.bulk_create([State(id=x['value'], name=x['name']) for x in state_data])
-        state_ids = [x.get('id') for x in state_data]
-        for state_id in state_ids:
+        state_ids = [x.get('value') for x in state_data]
+        for state_id in tqdm(state_ids, desc='Downloading cities'):
             time.sleep(1)
             data = requests.get(City.api_url.format(stateId=state_id)+self.api_suffix).json()
             City.objects.bulk_create([City(id=x['value'], name=x['name'], state_id=state_id) for x in data])
