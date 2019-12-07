@@ -7,9 +7,7 @@ router = routers.DefaultRouter()
 router.register(r'category', viewsets.TransportCategoryView)
 router.register(r'brands', viewsets.TransportBrandView)
 router.register(r'states', viewsets.StateViewSet)
-router.register(r'fueltypes', viewsets.FuelTypeViewSet)
-router.register(r'colors', viewsets.ColorViewSet)
-router.register(r'origin', viewsets.OriginViewSet)
+router.register(r'extras', viewsets.ExtraViewSet, base_name='extra')
 
 urlpatterns = [
     path('', create_view, name='create')

@@ -22,6 +22,8 @@ python-dotenv = "*"
 flower = "*"
 djangorestframework = "*"
 django-rest-knox = "*"
+pyyaml = "*"
+uritemplate = "*"
 
 [requires]
 python_version = "3.7"

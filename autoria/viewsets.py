@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions, viewsets
+from rest_framework import mixins, permissions, viewsets
 from rest_framework.response import Response
 
 from autoria.models import (State, TransportBrand, TransportCategory,
@@ -14,7 +14,11 @@ from autoria.serializers import (StateDetailSerializer, StateListSerializer,
                                  TransportOriginSerializer)
 
 
-class MultipleSerializersMixin:
+class SimpleViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    Simple ViewSet with ability to use additional serializer for `detail view`
+    Only `list` and `retrieve` actions are allowed
+    """
     detail_serializer = None
 
     def get_serializer_class(self):
@@ -25,40 +29,41 @@ class MultipleSerializersMixin:
         return self.serializer_class
 
 
-class OriginViewSet(viewsets.ModelViewSet):
-    queryset = TransportOrigin.objects.all()
-    permission_classes = [permissions.AllowAny]
-    serializer_class = TransportOriginSerializer
-
-
-class FuelTypeViewSet(viewsets.ModelViewSet):
-    queryset = TransportFuelType.objects.all()
-    permission_classes = [permissions.AllowAny]
-    serializer_class = TransportFuelTypeSerializer
-
-
-class ColorViewSet(viewsets.ModelViewSet):
-    queryset = TransportColors.objects.all()
-    permission_classes = [permissions.AllowAny]
-    serializer_class = TransportColorSerializer
-
-
-class StateViewSet(MultipleSerializersMixin, viewsets.ModelViewSet):
+class StateViewSet(SimpleViewSet):
     queryset = State.objects.all()
     permission_classes = [permissions.AllowAny]
     serializer_class = StateListSerializer
     detail_serializer = StateDetailSerializer
 
 
-class TransportBrandView(MultipleSerializersMixin, viewsets.ModelViewSet):
+class TransportBrandView(SimpleViewSet):
     permission_classes = [permissions.AllowAny]
     queryset = TransportBrand.objects.all()
     serializer_class = TransportBrandListSerializer
     detail_serializer = TransportBrandDetailSerializer
 
 
-class TransportCategoryView(MultipleSerializersMixin, viewsets.ModelViewSet):
+class TransportCategoryView(SimpleViewSet):
+
     queryset = TransportCategory.objects.all()
     permission_classes = [permissions.AllowAny]
     serializer_class = TransportCategoryListSerializer
     detail_serializer = TransportCategoryDetailsSerializer
+
+
+class ExtraViewSet(viewsets.ViewSet):
+    """
+    Return a list of all additional fields, unrelated to car categories.
+    """
+    permission_classes = [permissions.AllowAny]
+    http_method_names = ['get']
+
+    def list(self, request):
+        origin_data = TransportOriginSerializer(instance=TransportOrigin.objects.all(), many=True).data
+        fuel_data = TransportFuelTypeSerializer(instance=TransportFuelType.objects.all(), many=True).data
+        colors_data = TransportColorSerializer(instance=TransportColors.objects.all(), many=True).data
+        return Response({
+            'fueltypes': fuel_data,
+            'colors': colors_data,
+            'origin': origin_data
+        })
