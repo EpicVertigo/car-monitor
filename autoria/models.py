@@ -1,14 +1,14 @@
 from django.db import models
 from autoria.utils.decorators import periodic_task
 from django_celery_beat.models import PeriodicTask
+from django.contrib.auth.models import User
 
 
 @periodic_task
 class MonitorQuery(PeriodicTask):
     task = 'autoria.tasks.monitor_query'
-
-    class Meta:
-        proxy = True
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='monitors')
+    average_price = models.IntegerField(null=True, blank=True)
 
 
 class BaseApiModel(models.Model):
