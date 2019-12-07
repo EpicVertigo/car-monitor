@@ -19,6 +19,9 @@ celery = "*"
 django-celery-beat = "*"
 redis = "*"
 python-dotenv = "*"
+flower = "*"
+djangorestframework = "*"
+django-rest-knox = "*"
 
 [requires]
 python_version = "3.7"

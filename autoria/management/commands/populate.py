@@ -16,7 +16,7 @@ from carmonitor.settings import AUTORIA_API_KEY
 
 class AutoRiaDataController:
 
-    category_ids = []
+    category_ids = [1]
     api_suffix = f'?api_key={AUTORIA_API_KEY}'
 
     def __init__(self, *args, **kwargs):
@@ -38,49 +38,55 @@ class AutoRiaDataController:
 
     def _make_api_model_call(self, category_id, brand_id):
         time.sleep(1)
-        url = TransportBrand.api_url
+        url = TransportModel.api_url
         return requests.get(url.format(categoryId=category_id, markId=brand_id)+self.api_suffix).json()
 
     def download_categories(self):
         data = self._make_api_call(TransportCategory)
-        TransportCategory.objects.bulk_create([TransportCategory(**x) for x in data])
-        self.category_ids = TransportCategory.objects.values_list('value', flat=True)
+        TransportCategory.objects.bulk_create([TransportCategory(id=x['value'], name=x['name']) for x in data])
 
     def download_category_related(self):
         category_related_models = [TransportBodystyle, TransportBrand,
                                    TransportDriverType, TransportGearType, TransportOptions]
         for model in tqdm(category_related_models, desc='Downloading category related models'):
+            model_data = []
             for category_id in self.category_ids:
-                data = self._make_api_category_call(model, category_id)
-                model.objects.bulk_create([model(**x, category_id=category_id) for x in data])
+                model_data.extend(self._make_api_category_call(model, category_id))
+
+            filtered_data = (pd.DataFrame(model_data)
+                             .assign(category_id=category_id)
+                             .drop_duplicates(subset=['value', 'category_id'])
+                             .rename(columns={'value': 'id'})
+                             .to_dict(orient='records'))
+            model.objects.bulk_create([model(**x) for x in filtered_data])
 
     def download_models(self):
         all_data = []
         categories = [1]  # Только легковые
         for category in tqdm(categories, desc='Downloading Models from categories'):
-            brand_ids = TransportBrand.objects.filter(category_id=category).values_list('value', flat=True)
+            brand_ids = TransportBrand.objects.filter(category_id=category).values_list('id', flat=True)
             for brand in tqdm(list(brand_ids), desc='Downloading Models for Brands'):
                 data = self._make_api_model_call(category, brand)
-                data = [dict(category_id=category, brand_id=brand, **x) for x in data]
+                data = [dict(category_id=category, brand_id=brand, id=x['value'], name=x['name']) for x in data]
                 all_data.extend(data)
         # Filter out duplicates
-        filtered_data = pd.DataFrame(all_data).drop_duplicates(subset=['value', 'brand_id']).to_dict(orient='records')
+        filtered_data = pd.DataFrame(all_data).drop_duplicates(subset=['id', 'brand_id']).to_dict(orient='records')
         TransportModel.objects.bulk_create([TransportModel(**x) for x in filtered_data])
 
     def download_geo_data(self):
         state_data = requests.get(State.api_url+self.api_suffix).json()
-        State.objects.bulk_create([State(**x) for x in state_data])
-        state_ids = [x.get('value') for x in state_data]
+        State.objects.bulk_create([State(id=x['value'], name=x['name']) for x in state_data])
+        state_ids = [x.get('id') for x in state_data]
         for state_id in state_ids:
             time.sleep(1)
             data = requests.get(City.api_url.format(stateId=state_id)+self.api_suffix).json()
-            City.objects.bulk_create([City(**x, state_id=state_id) for x in data])
+            City.objects.bulk_create([City(id=x['value'], name=x['name'], state_id=state_id) for x in data])
 
     def download_unrelated_models(self):
         for model in [TransportFuelType, TransportColors, TransportOrigin]:
             time.sleep(1)
             data = requests.get(model.api_url+self.api_suffix).json()
-            model.objects.bulk_create([model(**x) for x in data])
+            model.objects.bulk_create([model(id=x['value'], name=x['name']) for x in data])
 
     def run(self):
         for func in self.steps:

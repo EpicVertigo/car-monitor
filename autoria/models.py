@@ -1,13 +1,26 @@
 from django.db import models
+from autoria.utils.decorators import periodic_task
+from django_celery_beat.models import PeriodicTask
+
+
+@periodic_task
+class MonitorQuery(PeriodicTask):
+    task = 'autoria.tasks.monitor_query'
+
+    class Meta:
+        proxy = True
 
 
 class BaseApiModel(models.Model):
     api_url = None
-    value = models.IntegerField()
+    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100)
 
     class Meta:
         abstract = True
+
+    def __str__(self):
+        return self.name
 
 
 class TransportCategory(BaseApiModel):
@@ -19,7 +32,7 @@ class TransportBodystyle(BaseApiModel):
     category = models.ForeignKey(TransportCategory, on_delete=models.CASCADE, related_name='bodystyles')
 
     class Meta(BaseApiModel.Meta):
-        unique_together = ('value', 'category')
+        unique_together = ('id', 'category')
 
 
 class TransportBrand(BaseApiModel):
@@ -27,7 +40,7 @@ class TransportBrand(BaseApiModel):
     category = models.ForeignKey(TransportCategory, on_delete=models.CASCADE, related_name='brands')
 
     class Meta(BaseApiModel.Meta):
-        unique_together = ('value', 'category')
+        unique_together = ('id', 'category')
 
 
 class TransportModel(BaseApiModel):
@@ -36,7 +49,7 @@ class TransportModel(BaseApiModel):
     brand = models.ForeignKey(TransportBrand, on_delete=models.CASCADE, related_name='models')
 
     class Meta(BaseApiModel.Meta):
-        unique_together = ('value', 'brand')
+        unique_together = ('id', 'brand')
 
 
 class State(BaseApiModel):
@@ -48,7 +61,7 @@ class City(BaseApiModel):
     state = models.ForeignKey(State, on_delete=models.CASCADE, related_name='cities')
 
     class Meta(BaseApiModel.Meta):
-        unique_together = ('value', 'state')
+        unique_together = ('id', 'state')
 
 
 class TransportDriverType(BaseApiModel):
@@ -56,7 +69,7 @@ class TransportDriverType(BaseApiModel):
     category = models.ForeignKey(TransportCategory, on_delete=models.CASCADE, related_name='drivertypes')
 
     class Meta(BaseApiModel.Meta):
-        unique_together = ('value', 'category')
+        unique_together = ('id', 'category')
 
 
 class TransportFuelType(BaseApiModel):
@@ -68,7 +81,7 @@ class TransportGearType(BaseApiModel):
     category = models.ForeignKey(TransportCategory, on_delete=models.CASCADE, related_name='geartypes')
 
     class Meta(BaseApiModel.Meta):
-        unique_together = ('value', 'category')
+        unique_together = ('id', 'category')
 
 
 class TransportOptions(BaseApiModel):
@@ -76,7 +89,7 @@ class TransportOptions(BaseApiModel):
     category = models.ForeignKey(TransportCategory, on_delete=models.CASCADE, related_name='options')
 
     class Meta(BaseApiModel.Meta):
-        unique_together = ('value', 'category')
+        unique_together = ('id', 'category')
 
 
 class TransportColors(BaseApiModel):

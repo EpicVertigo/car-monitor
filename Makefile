@@ -6,3 +6,6 @@ celery:
 
 celery-beat:
 	celery -A carmonitor beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+flower:
+	flower -A carmonitor --port=5555
