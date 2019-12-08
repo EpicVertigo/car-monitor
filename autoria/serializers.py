@@ -17,10 +17,10 @@ class MonitorQuerySerializer(serializers.Serializer):
     gearbox = serializers.IntegerField()
     bodystyle = serializers.IntegerField()
 
-    def _create_api_urls(self) -> str:
-        data = {f'{key}[0]': value for key, value in self.data.items() if isintance(value, int)}
+    def _create_api_urls(self, key=AUTORIA_API_KEY) -> str:
+        data = {f'{key}[0]': value for key, value in self.data.items() if isinstance(value, int)}
         query = urlencode(data)
-        return self.base_url.format(key=AUTORIA_API_KEY, query=query)
+        return self.base_url.format(key=key, query=query)
 
     def check_url(self, url: str, user=None):
         r = requests.get(url)
