@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import api from './api';
 import OptionField from './Components/OptionField';
+import ProgessBar from './Components/ProgessBar';
 
 class App extends Component {
   state = {
@@ -9,7 +10,11 @@ class App extends Component {
     formData: {
       categories: [],
       modelData: {
-        models: [],
+        models: [
+          {
+            id: null,
+          },
+        ],
       },
       categoriesData: {
         bodystyles: [],
@@ -18,11 +23,11 @@ class App extends Component {
         models: [],
       },
     },
-    category: null,
+    category_id: null,
     bodystyle: null,
-    brand: null,
-    geartype: null,
-    model: null,
+    marka_id: null,
+    gearbox: null,
+    model_id: null,
   };
 
   componentDidMount() {
@@ -30,11 +35,18 @@ class App extends Component {
       this.setState({
         formData: { ...this.state.formData, categories: res.data },
         isLoading: !this.state.isLoading,
+        category_id: res.data[0].id,
       });
       api.get(`category/${res.data[0].id}`).then(
         res => (
           this.setState({
-            formData: { ...this.state.formData, categoriesData: res.data },
+            formData: {
+              ...this.state.formData,
+              categoriesData: res.data,
+            },
+            bodystyle: res.data.bodystyles[0].id,
+            marka_id: res.data.brands[0].id,
+            gearbox: res.data.geartypes[0].id,
           }),
           this.getModels(res.data.brands[0].id)
         ),
@@ -47,7 +59,11 @@ class App extends Component {
   getModels = brandId => {
     api.get(`brands/${brandId}`).then(res =>
       this.setState({
-        formData: { ...this.state.formData, modelData: res.data },
+        formData: {
+          ...this.state.formData,
+          modelData: res.data,
+        },
+        model_id: res.data.models[0].id,
       }),
     );
   };
@@ -68,70 +84,56 @@ class App extends Component {
     this.getModels(id);
   };
 
+  onSubmit = e => {
+    e.preventDefault();
+    const { category_id, bodystyle, marka_id, gearbox, model_id } = this.state;
+    const data = { category_id, bodystyle, marka_id, gearbox, model_id };
+    api.post('/create_monitoring', data);
+  };
+
   render() {
     const { isLoading } = this.state;
     const { categories, categoriesData, modelData } = this.state.formData;
     return (
       <div className="container">
         {isLoading ? (
-          <div className="progress">
-            <div
-              className="progress-bar progress-bar-indeterminate"
-              role="progressbar"
-            ></div>
-          </div>
+          <ProgessBar />
         ) : (
-          <form className="text-center border border-light p-5" action="#!">
+          <form
+            onSubmit={this.onSubmit}
+            className="text-center border border-light p-5"
+          >
             <p className="h4 mb-4">Создать новый мониоринг</p>
-
-            <label>Тип автомобиля</label>
-            <select
-              name="category"
+            <OptionField
+              title="Тип автомобиля"
+              name="category_id"
               onChange={this.onChangeCategory}
-              className="browser-default custom-select mb-4"
-            >
-              <option value="" disabled>
-                Выберите опцию
-              </option>
-              {categories.map((el, index) => (
-                <option
-                  disabled={el.id !== 1 ? 'on' : null}
-                  key={el.id}
-                  value={el.id}
-                >
-                  {el.name}
-                </option>
-              ))}
-            </select>
-
+              options={categories}
+            />
             <OptionField
               title="Марка"
-              name="brand"
+              name="marka_id"
               onChange={this.onChangeBrand}
               options={categoriesData.brands}
             />
-
             <OptionField
               title="Модель"
-              name="model"
+              name="model_id"
               onChange={this.onChange}
               options={modelData.models}
             />
-
             <OptionField
               title="Тип кузова"
               name="bodystyle"
               onChange={this.onChange}
               options={categoriesData.bodystyles}
             />
-
             <OptionField
               title="Коробка передач"
-              name="geartype"
+              name="gearbox"
               onChange={this.onChange}
               options={categoriesData.geartypes}
             />
-
             <button className="btn btn-info btn-block">Создать</button>
           </form>
         )}

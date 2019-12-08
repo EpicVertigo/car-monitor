@@ -1,10 +1,12 @@
-from rest_framework import mixins, permissions, viewsets
+from rest_framework import generics, mixins, permissions, viewsets
 from rest_framework.response import Response
+from django.http.response import HttpResponseRedirect
 
 from autoria.models import (State, TransportBrand, TransportCategory,
                             TransportColors, TransportFuelType,
                             TransportOrigin)
-from autoria.serializers import (StateDetailSerializer, StateListSerializer,
+from autoria.serializers import (MonitorQuerySerializer, StateDetailSerializer,
+                                 StateListSerializer,
                                  TransportBrandDetailSerializer,
                                  TransportBrandListSerializer,
                                  TransportCategoryDetailsSerializer,
@@ -12,6 +14,17 @@ from autoria.serializers import (StateDetailSerializer, StateListSerializer,
                                  TransportColorSerializer,
                                  TransportFuelTypeSerializer,
                                  TransportOriginSerializer)
+
+
+class MonitorQueryView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = MonitorQuerySerializer
+
+    def post(self, request):
+        serializer = MonitorQuerySerializer(data=request.data)
+        if serializer.is_valid():
+            return serializer.create_monitoring(user=request.user)
+        return Response(serializer.errors, status=404)
 
 
 class SimpleViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):

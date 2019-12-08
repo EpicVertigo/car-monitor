@@ -10,5 +10,6 @@ router.register(r'states', viewsets.StateViewSet)
 router.register(r'extras', viewsets.ExtraViewSet, base_name='extra')
 
 urlpatterns = [
-    path('', create_view, name='create')
+    path('', create_view, name='create'),
+    path('api/create_monitoring', viewsets.MonitorQueryView.as_view(), name='create_monitoring')
 ]

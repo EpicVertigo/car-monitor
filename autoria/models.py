@@ -6,9 +6,10 @@ from django.contrib.auth.models import User
 
 @periodic_task
 class MonitorQuery(PeriodicTask):
-    task = 'autoria.tasks.monitor_query'
+    default_task = 'autoria.tasks.monitor_query'
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='monitors')
     average_price = models.IntegerField(null=True, blank=True)
+    url = models.URLField()
 
 
 class BaseApiModel(models.Model):
