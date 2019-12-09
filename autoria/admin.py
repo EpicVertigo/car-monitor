@@ -8,7 +8,7 @@ from autoria.models import MonitorQuery
 class MonitorQueryAdmin(PeriodicTaskAdmin):
     fieldsets = (
         (None, {
-            'fields': ('name', 'user', 'url', 'regtask', 'task', 'enabled', 'description',),
+            'fields': ('name', 'user', 'query_string', 'regtask', 'task', 'enabled', 'description',),
             'classes': ('extrapretty', 'wide'),
         }),
         ('Schedule', {

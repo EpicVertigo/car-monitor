@@ -25,6 +25,7 @@ django-rest-knox = "*"
 pyyaml = "*"
 uritemplate = "*"
 django-cors-headers = "*"
+scrapy-djangoitem = "*"
 
 [requires]
 python_version = "3.7"

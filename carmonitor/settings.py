@@ -24,6 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 AUTORIA_API_KEY = os.getenv('AUTORIA_API_KEY')
+AUTORIA_BASE_URL = 'https://developers.ria.com/auto/search?api_key={key}&{query}'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -34,6 +35,7 @@ ALLOWED_HOSTS = ['*']
 # Celery
 CELERY_BROKER_URL = 'redis://localhost:6379'
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 1
 
 # Application definition
 

@@ -9,7 +9,8 @@ class MonitorQuery(PeriodicTask):
     default_task = 'autoria.tasks.monitor_query'
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='monitors')
     average_price = models.IntegerField(null=True, blank=True)
-    url = models.URLField()
+    query_string = models.CharField(max_length=100)
+
 
 
 class BaseApiModel(models.Model):

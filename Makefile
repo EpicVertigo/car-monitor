@@ -9,3 +9,6 @@ celery-beat:
 
 flower:
 	flower -A carmonitor --port=5555
+
+shell:
+	python manage.py shell

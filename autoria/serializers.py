@@ -1,3 +1,4 @@
+import json
 from urllib.parse import urlencode
 from uuid import uuid4
 
@@ -6,41 +7,46 @@ from rest_framework import serializers
 from rest_framework.response import Response
 
 from autoria.models import *
-from carmonitor.settings import AUTORIA_API_KEY
+from carmonitor.settings import AUTORIA_API_KEY, AUTORIA_BASE_URL
 
 
 class MonitorQuerySerializer(serializers.Serializer):
-    base_url = 'https://developers.ria.com/auto/search?api_key={key}&{query}'
     category_id = serializers.IntegerField(required=True)
     marka_id = serializers.IntegerField(required=True)
     model_id = serializers.IntegerField(required=True)
     gearbox = serializers.IntegerField()
     bodystyle = serializers.IntegerField()
 
-    def _create_api_urls(self, key=AUTORIA_API_KEY) -> str:
+    def _create_query_string(self) -> str:
         data = {f'{key}[0]': value for key, value in self.data.items() if isinstance(value, int)}
-        query = urlencode(data)
-        return self.base_url.format(key=key, query=query)
+        return urlencode(data)
 
-    def check_url(self, url: str, user=None):
-        r = requests.get(url)
+    def convert_to_new_params(self, query: str) -> str:
+        r = requests.get(f'https://developers.ria.com/old_to_new?api_key={AUTORIA_API_KEY}&{query}')
+        return r.json().get('string')
+
+    def check_url(self, query: str, user=None, key: str = AUTORIA_API_KEY):
+        r = requests.get(AUTORIA_BASE_URL.format(key=key, query=query))
         if 200 <= r.status_code < 400:
             data = r.json()
             results = data.get('result').get('search_result').get('ids')
             if len(results) == 0:
                 return Response('No results for given query', status=400)
+            query = self.convert_to_new_params(query)
+            uuid = uuid4()
             MonitorQuery.objects.create(
                 task=MonitorQuery.default_task,
                 user=user,
-                url=url,
-                name=uuid4(),
-                interval_id=1
+                query_string=query,
+                name=uuid,
+                interval_id=1,
+                args=json.dumps([str(uuid)])
             )
             return Response('Success', status=200)
         return Response(r.json(), status=r.status_code)
 
     def create_monitoring(self, user=None, **kwargs):
-        return self.check_url(self._create_api_urls(), user=user)
+        return self.check_url(self._create_query_string(), user=user)
 
 
 class TransportColorSerializer(serializers.ModelSerializer):
