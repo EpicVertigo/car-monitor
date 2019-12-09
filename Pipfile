@@ -29,6 +29,7 @@ scrapy-djangoitem = "*"
 proxybroker = "*"
 bs4 = "*"
 lxml = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.7"

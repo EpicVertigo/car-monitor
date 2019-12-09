@@ -13,6 +13,4 @@ class AutoRiaSpider(Spider):
 
     def parse(self, response):
         soup = Soup(response.body, 'lxml')
-        import ipdb
-        ipdb.set_trace()
         pass

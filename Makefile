@@ -12,3 +12,11 @@ flower:
 
 shell:
 	python manage.py shell
+
+collectstatic:
+	python manage.py collectstatic --noinput
+
+gunicorn:
+	gunicorn -b 0.0.0.0:8000 carmonitor.wsgi:application
+
+run: collectstatic gunicorn
