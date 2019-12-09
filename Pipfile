@@ -26,6 +26,9 @@ pyyaml = "*"
 uritemplate = "*"
 django-cors-headers = "*"
 scrapy-djangoitem = "*"
+proxybroker = "*"
+bs4 = "*"
+lxml = "*"
 
 [requires]
 python_version = "3.7"

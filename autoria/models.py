@@ -2,6 +2,7 @@ from django.db import models
 from autoria.utils.decorators import periodic_task
 from django_celery_beat.models import PeriodicTask
 from django.contrib.auth.models import User
+from django.core.validators import MinLengthValidator, MaxLengthValidator
 
 
 @periodic_task
@@ -10,7 +11,6 @@ class MonitorQuery(PeriodicTask):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='monitors')
     average_price = models.IntegerField(null=True, blank=True)
     query_string = models.CharField(max_length=100)
-
 
 
 class BaseApiModel(models.Model):
@@ -100,3 +100,27 @@ class TransportColors(BaseApiModel):
 
 class TransportOrigin(BaseApiModel):
     api_url = 'https://developers.ria.com/auto/countries'
+
+
+class MonitorResult(models.Model):
+    monitor = models.ForeignKey(MonitorQuery, on_delete=models.CASCADE, related_name='results')
+    brand = models.ForeignKey(TransportBrand, on_delete=models.SET_NULL, null=True, related_name='results')
+    model = models.ForeignKey(TransportModel, on_delete=models.SET_NULL, null=True, related_name='results')
+    year = models.IntegerField(validators=[MinLengthValidator(1900), MaxLengthValidator(2050)])
+    title = models.CharField(max_length=250)
+    uri = models.CharField(max_length=250)
+
+
+class MonitorPriceChangeEvent(models.Model):
+    old_price = models.IntegerField()
+    new_price = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    announced = models.BooleanField(default=True)
+    result = models.ForeignKey(MonitorResult, on_delete=models.CASCADE, related_name='events')
+
+    @property
+    def difference(self):
+        return NotImplementedError
+
+    def __str__(self):
+        return f'Price change event: {self.id}'
